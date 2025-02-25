@@ -6,6 +6,11 @@ import Products from "@/pages/Products.vue";
 import Customers from "@/pages/Users.vue";
 import Login from "@/pages/Login.vue";
 import ProductDetails from "@/pages/ProductDetails.vue";
+import AddProduct from "@/pages/AddProduct.vue";
+import EditProduct from "@/pages/EditProduct.vue";
+import { auth, db } from "@/firebase/firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const routes = [
   { path: "/login", component: Login },
@@ -17,8 +22,9 @@ const routes = [
       { path: "orders", component: Orders, meta: { requiresAuth: true } },
       { path: "products", component: Products, meta: { requiresAuth: true } },
       { path: "customers", component: Customers, meta: { requiresAuth: true } },
-      { path: '/products/:id', component: ProductDetails, props: true }, // Product Details Page
-
+      { path: "/products/:id", component: ProductDetails, props: true },
+      { path: "/products/add", component: AddProduct, meta: { requiresAuth: true } },
+      { path: "/products/edit/:id", component: EditProduct, props: true, meta: { requiresAuth: true } },
     ],
   },
 ];
@@ -28,12 +34,32 @@ const router = createRouter({
   routes,
 });
 
-// Navigation Guard: Redirect to login if not authenticated
+// 🛠 FIX: Use onAuthStateChanged to wait for Firebase authentication
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem("authToken");
+  if (to.meta.requiresAuth) {
+    // Wait for Firebase to initialize user
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe(); // Stop listening once we get the user
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next("/login"); // Redirect to login if not authenticated
+      if (!user) {
+        console.warn("🔴 No user found, redirecting to login...");
+        next("/login");
+        return;
+      }
+
+      // Check if user is an admin
+      const adminRef = doc(db, "admins", user.uid);
+      const adminSnap = await getDoc(adminRef);
+
+      if (adminSnap.exists() && adminSnap.data().role === "admin") {
+        console.log("✅ Admin verified, granting access.");
+        next();
+      } else {
+        console.warn("⛔ Access denied: Not an admin.");
+        alert("Access Denied: You are not an admin.");
+        next("/login");
+      }
+    });
   } else {
     next();
   }
