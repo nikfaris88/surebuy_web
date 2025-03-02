@@ -1,117 +1,202 @@
 <template>
-  <div class="container">
-    <h1>Customer List</h1>
+  <h1>Customer List</h1>
+  <div class="product-container">
+    <div class="header">
+      <input type="text" v-model="searchQuery" placeholder="Search Customer" class="search-bar" />
+    </div>
 
-    <!-- Search Bar -->
-    <input type="text" v-model="searchQuery" placeholder="Search customers..." />
+    <div class="filter-status">
+      <label style="margin-right: 10px;">Filter Status:</label>
+      <select v-model="selectedStatus">
+        <option value="">All</option>
+        <option value="Verified">Verified</option>
+        <option value="Unverified">Unverified</option>
+      </select>
+    </div>
 
-    <button @click="addCustomer">Add Customer</button>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="customer in filteredCustomers" :key="customer.id">
-          <td>{{ customer.name }}</td>
-          <td>{{ customer.email }}</td>
-          <td>{{ customer.phone }}</td>
-          <td>
-            <button @click="editCustomer(customer.id)">Edit</button>
-            <button @click="confirmDelete(customer.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Delete Confirmation Modal -->
-    <ConfirmationModal
-      v-if="showModal"
-      @confirm="deleteCustomer"
-      @close="showModal = false"
-    />
+    <div class="product-table-container">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="customer in filteredCustomers" :key="customer.id">
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.phone }}</td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.address }}</td>
+            <td>
+              <span @click="toggleStatus(customer)"
+                :class="{ verified: customer.status === 'Verified', unverified: customer.status === 'Unverified' }">
+                {{ customer.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
-import ConfirmationModal from "@/components/ConfirmationModal.vue";
+import { useRouter } from "vue-router";
+import { useCustomerStore } from "@/stores/customerStore";
+import { getFirestore, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
-const customers = ref([]);
-const searchQuery = ref("");
-const showModal = ref(false);
-const customerToDelete = ref(null);
+export default {
+  setup() {
+    const customerStore = useCustomerStore();
+    const router = useRouter();
+    const searchQuery = ref("");
+    const selectedStatus = ref("");
+    const selectedProducts = ref([]);
+    const db = getFirestore();
 
-const fetchCustomers = async () => {
-  try {
-    const response = await axios.get("https://api.example.com/customers");
-    customers.value = response.data;
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-  }
+    onMounted(() => {
+      customerStore.fetchCustomers();
+    });
+
+    const filteredCustomers = computed(() => {
+      return customerStore.customers.filter((customer) => {
+        return (
+          customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) &&
+          (selectedStatus.value === "" || customer.status === selectedStatus.value)
+        );
+      });
+    });
+
+    const toggleStatus = async (customer) => {
+      const newStatus = customer.status === "Verified" ? "Unverified" : "Verified";
+      const customerRef = doc(db, "customers", customer.id);
+
+      try {
+        await updateDoc(customerRef, { status: newStatus });
+        customer.status = newStatus; // Update locally
+      } catch (error) {
+        console.error("Error updating status:", error);
+      }
+    };
+
+    return {
+      searchQuery,
+      selectedStatus,
+      selectedProducts,
+      filteredCustomers,
+      toggleStatus,
+    };
+  },
 };
-
-const filteredCustomers = computed(() => {
-  return customers.value.filter(customer =>
-    customer.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-const addCustomer = () => {
-  // Navigate to Add Customer Page
-  console.log("Redirect to Add Customer Page");
-};
-
-const editCustomer = (id) => {
-  console.log("Edit customer:", id);
-  // Navigate to edit page
-};
-
-const confirmDelete = (id) => {
-  customerToDelete.value = id;
-  showModal.value = true;
-};
-
-const deleteCustomer = async () => {
-  try {
-    await axios.delete(`https://api.example.com/customers/${customerToDelete.value}`);
-    customers.value = customers.value.filter(customer => customer.id !== customerToDelete.value);
-    showModal.value = false;
-  } catch (error) {
-    console.error("Error deleting customer:", error);
-  }
-};
-
-onMounted(fetchCustomers);
 </script>
 
 <style scoped>
-.container {
-  max-width: 800px;
-  margin: auto;
+.product-container {
   padding: 20px;
 }
 
-table {
+.product-table-container {
+  background-color: #fff;
+  box-shadow: 1px 1px 7px 0px #bababc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.search-bar {
+  padding: 8px;
+  width: 300px;
+  border: 1px solid #ccc;
+}
+
+.add-product-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+}
+
+.filter-status {
+  margin-bottom: 10px;
+}
+
+.product-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: left;
+.product-table tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.product-table tbody tr:nth-child(even) {
+  background-color: #fff;
+}
+
+.product-table th, .product-table td {
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  padding: 5px 8px;
+}
+
+.product-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.verified {
+  color: green;
+  cursor: pointer;
+}
+
+.unverified {
+  color: red;
+  cursor: pointer;
 }
 
 button {
-  margin: 5px;
-  padding: 5px 10px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
   cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.preview-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px;
+  margin-left: 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.delete-selected-btn {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
 }
 </style>
