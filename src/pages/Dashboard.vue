@@ -21,7 +21,7 @@
           <div class="summary-card"><h3>Completed: </h3> <h3 class="summary-value">{{ orders.completedOrder }}</h3></div>
         </div>
         <div class="stat-card">
-          <h2>📦 Orders</h2>
+          <h2>📦 Products</h2>
           <div class="summary-card"><h3>Available: </h3> <h3 class="summary-value">{{ products.available }}</h3></div>
           <div class="summary-card"><h3>Disabled: </h3> <h3 class="summary-value">{{ products.disabled }}</h3></div>
         </div>
@@ -69,8 +69,8 @@ import LineChart from "@/components/LineChart.vue";
       let unverified = 0, verified = 0;
 
       for (const customer of customerStore.customers) {
-        if (customer.status === 'Pending') unverified += 1
-        if (customer.status === 'Completed') verified += 1
+        if (customer.status === 'Unverified') unverified += 1
+        if (customer.status === 'Verified') verified += 1
       }
 
       return { unverified, verified }
@@ -80,8 +80,8 @@ import LineChart from "@/components/LineChart.vue";
       let available = 0, disabled = 0;
 
       for (const product of productStore.products) {
-        if (product.status === 'Pending') available += 1
-        if (product.status === 'Completed') disabled += 1
+        if (product.status === 'Available') available += 1
+        if (product.status === 'Disabled') disabled += 1
       }
 
       return { available, disabled }
@@ -146,7 +146,7 @@ import LineChart from "@/components/LineChart.vue";
   background: white;
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 

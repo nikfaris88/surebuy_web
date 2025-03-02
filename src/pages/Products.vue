@@ -157,7 +157,7 @@ export default {
 
 .product-table-container {
   background-color: #fff;
-  box-shadow: 1px 1px 7px 0px #bababc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   padding: 20px;
   margin-top: 40px;

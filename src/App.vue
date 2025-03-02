@@ -52,7 +52,6 @@ const showSidebar = computed(() => isAuthenticated.value && route.path !== '/log
 
 .main-content {
   flex: 1;
-  padding: 20px;
 }
 
 .fade-enter-active,

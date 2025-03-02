@@ -4,7 +4,13 @@
       ⬅ Back to Product List
     </button>
 
+   <div class="page-title">
     <h1>Product Details</h1>
+    <div class="actions">
+        <button @click="editProduct" class="edit-button">Edit</button>
+        <button @click="confirmDelete" class="delete-button">Delete</button>
+      </div>
+   </div>
 
     <div v-if="product">
       <div class="product-info">
@@ -16,11 +22,6 @@
           <p><strong>Price:</strong> RM {{ product.price }}</p>
           <p><strong>Stock:</strong> {{ product.stock }}</p>
         </div>
-      </div>
-
-      <div class="actions">
-        <button @click="editProduct" class="edit-button">Edit</button>
-        <button @click="confirmDelete" class="delete-button">Delete</button>
       </div>
 
       <!-- Confirmation Modal -->
@@ -103,9 +104,12 @@ export default {
 
 <style scoped>
 .container {
-  max-width: 600px;
-  margin: auto;
   padding: 20px;
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
 }
 
 .back-button {
@@ -121,10 +125,11 @@ export default {
 }
 
 .product-image {
-  width: 150px;
-  height: auto;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 5px;
+  object-fit: cover;
+  width: 300px;
+  height: auto;
 }
 
 .details {
@@ -136,8 +141,8 @@ export default {
 }
 
 .edit-button {
-  background-color: #4caf50;
-  color: white;
+  background-color: #e8e8e8;
+  border-radius: 5px;
   padding: 10px;
   margin-right: 10px;
   border: none;
@@ -146,6 +151,7 @@ export default {
 
 .delete-button {
   background-color: #f44336;
+  border-radius: 5px;
   color: white;
   padding: 10px;
   border: none;

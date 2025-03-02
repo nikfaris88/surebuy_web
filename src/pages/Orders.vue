@@ -20,9 +20,10 @@
           <tr>
             <th>ID</th>
             <th>Product</th>
-            <th>Price (RM)</th>
             <th>Customer</th>
+            <th>Purchase Date</th>
             <th>Quantity</th>
+            <th>Price (RM)</th>
             <th>Total Price (RM)</th>
             <th>Status</th>
             <th>Action</th>
@@ -32,9 +33,10 @@
           <tr v-for="order in filteredOrders" :key="order.id">
             <td>{{ order.id }}</td>
             <td>{{ order.product.name }}</td>
-            <td>{{ order.product.price }}</td>
             <td>{{ order.customer.name }}</td>
+            <td>{{ order.date }}</td>
             <td>{{ order.quantity }}</td>
+            <td>{{ order.product.price }}</td>
             <td>{{ order.totalPrice }}</td>
             <td>
               <span :class="{ pending: order.status === 'Pending', completed: order.status === 'Completed' }">
@@ -48,26 +50,19 @@
         </tbody>
       </table>
     </div>
-
-    <ConfirmationModal v-if="showModal" @confirm="completeOrder" @close="showModal = false" />
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import { useOrderStore } from "@/stores/orderStore";
-import ConfirmationModal from "@/components/ConfirmationModal.vue";
 import { getFirestore, doc, deleteDoc, updateDoc } from "firebase/firestore";
 
 export default {
-  components: { ConfirmationModal },
   setup() {
     const orderStore = useOrderStore();
-    const router = useRouter();
     const searchQuery = ref("");
     const selectedStatus = ref("");
-    const showModal = ref(false);
     const db = getFirestore();
 
     onMounted(() => {
@@ -96,11 +91,10 @@ export default {
     };
 
     return {
+      completeOrder,
+      filteredOrders,
       searchQuery,
       selectedStatus,
-      showModal,
-      filteredOrders,
-      completeOrder
     };
   },
 };
@@ -113,7 +107,7 @@ export default {
 
 .order-table-container {
   background-color: #fff;
-  box-shadow: 1px 1px 7px 0px #bababc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   padding: 20px;
   margin-top: 40px;
