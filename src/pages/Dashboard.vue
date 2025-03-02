@@ -2,60 +2,102 @@
   <div class="dashboard-container">
     <!-- Sidebar -->
 
-
     <!-- Main Content -->
     <main class="dashboard-content">
-      <!-- Header -->
-      <div class="header">
-        <span class="admin-icon">👤</span> Admin
-      </div>
-
       <!-- Sales Analytics -->
-      <h2>Sales Analytics</h2>
-      <LineChart />
+      <h1>Sales Analytics</h1>
+      <LineChart :labels="salesLabels" 
+        :datasets="[
+          { label: 'Completed', data: completedSalesData, borderColor: 'green' },
+          { label: 'Pending', data: pendingSalesData, borderColor: 'orange' },
+        ]"
+      />
 
       <!-- Statistics Cards -->
       <div class="stats">
         <div class="stat-card">
-          <p>Sales</p>
-          <h3>174</h3>
-          <span>📈</span>
+          <h2>📈 Orders</h2>
+          <div class="summary-card"><h3>Pending: </h3> <h3 class="summary-value">{{ orders.pendingOrder }}</h3></div>
+          <div class="summary-card"><h3>Completed: </h3> <h3 class="summary-value">{{ orders.completedOrder }}</h3></div>
         </div>
         <div class="stat-card">
-          <p>Orders</p>
-          <h3>235</h3>
-          <span>📦</span>
+          <h2>📦 Orders</h2>
+          <div class="summary-card"><h3>Available: </h3> <h3 class="summary-value">{{ products.available }}</h3></div>
+          <div class="summary-card"><h3>Disabled: </h3> <h3 class="summary-value">{{ products.disabled }}</h3></div>
         </div>
         <div class="stat-card">
-          <p>Customers</p>
-          <h3>42</h3>
-          <span>👥</span>
+          <h2>👥 Customers</h2>
+          <div class="summary-card"><h3>Verified: </h3> <h3 class="summary-value">{{ customers.verified }}</h3></div>
+          <div class="summary-card"><h3>Unverified: </h3> <h3 class="summary-value">{{ customers.unverified }}</h3></div>
         </div>
       </div>
     </main>
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
+import { ref, computed, onMounted } from "vue";
+
+import { useOrderStore } from "@/stores/orderStore";
+import { useCustomerStore } from "@/stores/customerStore";
+import { useProductStore } from "@/stores/productStore";
 import LineChart from "@/components/LineChart.vue";
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
+    const orderStore = useOrderStore();
+    const customerStore = useCustomerStore();
+    const productStore = useProductStore();
 
-const menuItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Products", path: "/dashboard/products" },
-  { label: "Orders", path: "/dashboard/orders" },
-  { label: "Customers", path: "/dashboard/customers" },
-];
+    onMounted(() => {
+      orderStore.fetchOrders();
+      orderStore.fetchSalesSummary();
+      customerStore.fetchCustomers();
+      productStore.fetchProducts();
+    });
 
-const navigateTo = (path: string) => {
-  router.push(path);
-};
+    const orders = computed(() => {
+      let pendingOrder = 0, completedOrder = 0;
+
+      for (const order of orderStore.orders) {
+        if (order.status === 'Pending') pendingOrder += 1
+        if (order.status === 'Completed') completedOrder += 1
+      }
+
+      return { pendingOrder, completedOrder }
+    })
+
+    const customers = computed(() => {
+      let unverified = 0, verified = 0;
+
+      for (const customer of customerStore.customers) {
+        if (customer.status === 'Pending') unverified += 1
+        if (customer.status === 'Completed') verified += 1
+      }
+
+      return { unverified, verified }
+    })
+
+    const products = computed(() => {
+      let available = 0, disabled = 0;
+
+      for (const product of productStore.products) {
+        if (product.status === 'Pending') available += 1
+        if (product.status === 'Completed') disabled += 1
+      }
+
+      return { available, disabled }
+    })
+
+    const salesSummary = computed(() => orderStore.salesSummary || {});
+    const salesLabels = computed(() => Object.keys(salesSummary.value)); 
+    const pendingSalesData = computed(() => Object.values(salesSummary.value).map(x => x["Pending"]));
+    const completedSalesData = computed(() => Object.values(salesSummary.value).map(x => x["Completed"]));
+
+    console.log(completedSalesData.value)
 </script>
 
 <style scoped>
 .dashboard-container {
+  background-color: #f3f3f4;
   display: flex;
   height: 100vh;
 }
@@ -93,8 +135,10 @@ const navigateTo = (path: string) => {
 }
 
 .stats {
-  display: flex;
+  display: grid;
   justify-content: space-between;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
   margin-top: 20px;
 }
 
@@ -102,8 +146,24 @@ const navigateTo = (path: string) => {
   background: white;
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);;
   text-align: center;
-  width: 150px;
+}
+
+h3 {
+  margin: 5px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-value {
+  background-color: #f3f3f4;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100px;
 }
 </style>

@@ -11,11 +11,13 @@ export interface Order {
   quantity: number;
   totalPrice: number;
   status: string;
+  date: string;
 }
 
 export const useOrderStore = defineStore("orders", {
   state: () => ({
     orders: [] as Order[],
+    salesSummary: [] as any[],
   }),
 
   actions: {
@@ -55,5 +57,41 @@ export const useOrderStore = defineStore("orders", {
         console.error("Error fetching orders:", error);
       }
     },
+
+    async fetchSalesSummary() {
+      const querySnapshot = await getDocs(collection(db, "orders"));
+
+      const orders: any[] = await Promise.all(
+        querySnapshot.docs.map(async (orderDoc) => orderDoc.data())
+      )
+
+      const sales: any = {};
+      const now = new Date();
+      const sixMonthsAgo = new Date();
+      
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+      sixMonthsAgo.setDate(1);
+
+      for (let i = 5; i >= 0; i--) {
+          const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const year = date.getFullYear();
+          const month = date.toLocaleDateString('US', { month: 'short'});
+          sales[`${month} ${year}`] = { "Pending": 0, "Completed": 0 };
+      }
+
+      this.salesSummary = orders
+        .filter(order => new Date(order.date) >= sixMonthsAgo)
+        .reduce((acc: any, order: Order) => {
+            const date = new Date(order.date);
+            const month = date.toLocaleDateString('US', { month: 'short'});
+            const year = date.getFullYear();
+            
+            if (acc[`${month} ${year}`]) {
+              acc[`${month} ${year}`][order.status] += 1;
+            }
+            
+            return acc;
+        }, sales);
+    }
   }
 });
