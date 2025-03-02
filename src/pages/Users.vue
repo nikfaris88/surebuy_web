@@ -1,6 +1,6 @@
 <template>
-  <h1>Customer List</h1>
   <div class="product-container">
+    <h1>Customer List</h1>
     <div class="header">
       <input type="text" v-model="searchQuery" placeholder="Search Customer" class="search-bar" />
     </div>
