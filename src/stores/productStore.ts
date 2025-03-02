@@ -1,8 +1,8 @@
-import { defineStore } from "pinia";
-import { collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
+import { addDoc, collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { defineStore } from "pinia";
 
-interface Product {
+export interface Product {
   id?: string;
   name: string;
   category: string;

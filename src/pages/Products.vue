@@ -1,12 +1,13 @@
 <template>
   <div class="product-container">
+    <h1>Product List</h1>
     <div class="header">
       <input type="text" v-model="searchQuery" placeholder="Search Product" class="search-bar" />
       <button @click="addProduct" class="add-product-btn">+ Add Product</button>
     </div>
 
     <div class="filter-category">
-      <label>Filter Category:</label>
+      <label style="margin-right: 10px;">Filter Category:</label>
       <select v-model="selectedCategory">
         <option value="">All</option>
         <option value="Men">Men</option>
@@ -15,40 +16,43 @@
       </select>
     </div>
 
-    <table class="product-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Stock</th>
-          <th>Price (RM)</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="product in filteredProducts" :key="product.id">
-          <td>
-            <input type="checkbox" v-model="selectedProducts" :value="product.id" />
-          </td>
-          <td><img :src="product.image" alt="Product Image" class="product-thumbnail" /></td>
-          <td>{{ product.name }}</td>
-          <td>
-            <span @click="toggleStatus(product)"
-              :class="{ available: product.status === 'Available', disabled: product.status === 'Disabled' }">
-              {{ product.status }}
-            </span>
-          </td>
-          <td>{{ product.stock }}</td>
-          <td>{{ product.price }}</td>
-          <td>
-            <button @click="editProduct(product.id)" class="edit-btn">Edit</button>
-            <button @click="previewProduct(product.id)" class="preview-btn">Preview</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="product-table-container">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Stock</th>
+            <th>Price (RM)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in filteredProducts" :key="product.id">
+            <td>
+              <input type="checkbox" v-model="selectedProducts" :value="product.id" />
+            </td>
+            <td><img :src="product.image" alt="Product Image" class="product-thumbnail" /></td>
+            <td>{{ product.name }}</td>
+            <td>
+              <span @click="toggleStatus(product)"
+                :class="{ available: product.status === 'Available', disabled: product.status === 'Disabled' }">
+                {{ product.status }}
+              </span>
+            </td>
+            <td>{{ product.stock }}</td>
+            <td>{{ product.price }}</td>
+            <td>
+              <button @click="editProduct(product.id)" class="edit-btn">Edit</button>
+              <button @click="previewProduct(product.id)" class="preview-btn">Preview</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
 
     <button v-if="selectedProducts.length" @click="confirmDelete" class="delete-selected-btn">Delete Selected</button>
 
@@ -151,6 +155,14 @@ export default {
   padding: 20px;
 }
 
+.product-table-container {
+  background-color: #fff;
+  box-shadow: 1px 1px 7px 0px #bababc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 40px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -179,14 +191,20 @@ export default {
 .product-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
 }
 
-th,
-td {
-  padding: 10px;
-  border: 1px solid #ddd;
+.product-table tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.product-table tbody tr:nth-child(even) {
+  background-color: #fff;
+}
+
+.product-table th, .product-table td {
+  border-bottom: 1px solid #ddd;
   text-align: center;
+  padding: 5px 8px;
 }
 
 .product-thumbnail {

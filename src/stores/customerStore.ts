@@ -2,7 +2,7 @@ import { db } from "@/firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { defineStore } from "pinia";
 
-interface Customer {
+export interface Customer {
   id?: string;
   name: string;
   phone: string;

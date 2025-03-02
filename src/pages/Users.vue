@@ -14,8 +14,8 @@
       </select>
     </div>
 
-    <div class="product-table-container">
-      <table class="product-table">
+    <div class="customer-table-container">
+      <table class="customer-table">
         <thead>
           <tr>
             <th>Name</th>
@@ -100,7 +100,7 @@ export default {
   padding: 20px;
 }
 
-.product-table-container {
+.customer-table-container {
   background-color: #fff;
   box-shadow: 1px 1px 7px 0px #bababc;
   border-radius: 5px;
@@ -133,20 +133,20 @@ export default {
   margin-bottom: 10px;
 }
 
-.product-table {
+.customer-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.product-table tbody tr:nth-child(odd) {
+.customer-table tbody tr:nth-child(odd) {
   background-color: #f9f9f9;
 }
 
-.product-table tbody tr:nth-child(even) {
+.customer-table tbody tr:nth-child(even) {
   background-color: #fff;
 }
 
-.product-table th, .product-table td {
+.customer-table th, .customer-table td {
   border-bottom: 1px solid #ddd;
   text-align: center;
   padding: 5px 8px;
