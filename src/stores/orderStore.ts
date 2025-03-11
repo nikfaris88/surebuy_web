@@ -14,6 +14,8 @@ export interface Order {
   date: string;
 }
 
+const formatter = new Intl.DateTimeFormat("en-MY", { timeZone: "Asia/Kuala_Lumpur", timeStyle: "medium", dateStyle: "short" });
+
 export const useOrderStore = defineStore("orders", {
   state: () => ({
     orders: [] as Order[],
@@ -49,8 +51,9 @@ export const useOrderStore = defineStore("orders", {
                 productData = productSnap.data();
               }
             }
-      
-            return { id: orderDoc.id, ...orderData, customer: customerData, product: productData };
+
+            const date = formatter.format(new Date(orderData.date?.seconds * 1000))
+            return { id: orderDoc.id, ...orderData, customer: customerData, product: productData, date };
           })
         ) as Order[];
       } catch (error) {
