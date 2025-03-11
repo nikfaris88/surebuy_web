@@ -36,12 +36,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 
-import { useOrderStore } from "@/stores/orderStore";
-import { useCustomerStore } from "@/stores/customerStore";
-import { useProductStore } from "@/stores/productStore";
 import LineChart from "@/components/LineChart.vue";
+import { useCustomerStore } from "@/stores/customerStore";
+import { useOrderStore } from "@/stores/orderStore";
+import { useProductStore } from "@/stores/productStore";
 
     const orderStore = useOrderStore();
     const customerStore = useCustomerStore();
@@ -91,8 +91,6 @@ import LineChart from "@/components/LineChart.vue";
     const salesLabels = computed(() => Object.keys(salesSummary.value)); 
     const pendingSalesData = computed(() => Object.values(salesSummary.value).map(x => x["Pending"]));
     const completedSalesData = computed(() => Object.values(salesSummary.value).map(x => x["Completed"]));
-
-    console.log(completedSalesData.value)
 </script>
 
 <style scoped>

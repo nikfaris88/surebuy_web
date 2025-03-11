@@ -34,7 +34,7 @@
             <td>{{ order.id }}</td>
             <td>{{ order.product.name }}</td>
             <td>{{ order.customer.name }}</td>
-            <td>{{ order.date }}</td>
+            <td>{{ order.formattedDate }}</td>
             <td>{{ order.quantity }}</td>
             <td>{{ order.product.price }}</td>
             <td>{{ order.totalPrice }}</td>
@@ -54,9 +54,9 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
-import { getFirestore, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { computed, onMounted, ref } from "vue";
 
 export default {
   setup() {

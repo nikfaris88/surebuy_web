@@ -11,7 +11,8 @@ export interface Order {
   quantity: number;
   totalPrice: number;
   status: string;
-  date: string;
+  date: Date;
+  formattedDate: string;
 }
 
 const formatter = new Intl.DateTimeFormat("en-MY", { timeZone: "Asia/Kuala_Lumpur", timeStyle: "medium", dateStyle: "short" });
@@ -52,8 +53,9 @@ export const useOrderStore = defineStore("orders", {
               }
             }
 
-            const date = formatter.format(new Date(orderData.date?.seconds * 1000))
-            return { id: orderDoc.id, ...orderData, customer: customerData, product: productData, date };
+            const date = new Date(orderData.date?.seconds * 1000)
+            const formattedDate = formatter.format(date)
+            return { id: orderDoc.id, ...orderData, customer: customerData, product: productData, date, formattedDate };
           })
         ) as Order[];
       } catch (error) {
@@ -65,7 +67,11 @@ export const useOrderStore = defineStore("orders", {
       const querySnapshot = await getDocs(collection(db, "orders"));
 
       const orders: any[] = await Promise.all(
-        querySnapshot.docs.map(async (orderDoc) => orderDoc.data())
+        querySnapshot.docs.map(async (orderDoc) => {
+          const order = orderDoc.data()
+
+          return { ...order, date: new Date(order.date?.seconds * 1000)}
+        })
       )
 
       const sales: any = {};
