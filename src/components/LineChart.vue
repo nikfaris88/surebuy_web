@@ -5,26 +5,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import Chart from "chart.js/auto";
 
-const chartCanvas = ref<HTMLCanvasElement | null>(null);
+const props = defineProps<{
+  labels: string[];
+  datasets: { label: string; data: number[]; borderColor: string }[];
+}>();
 
-onMounted(() => {
+const chartCanvas = ref<HTMLCanvasElement | null>(null);
+let chartInstance: Chart | null = null;
+
+const createChart = () => {
   if (chartCanvas.value) {
-    new Chart(chartCanvas.value, {
+    chartInstance = new Chart(chartCanvas.value, {
       type: "line",
       data: {
-        labels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"],
-        datasets: [
-          {
-            label: "Sales",
-            data: [50, 100, 90, 160, 110, 130],
-            borderColor: "blue",
-            borderWidth: 2,
-            fill: false,
-          },
-        ],
+        labels: props.labels,
+        datasets: props.datasets.map((ds) => ({
+          ...ds,
+          borderWidth: 2,
+          fill: false,
+        })),
       },
       options: {
         responsive: true,
@@ -32,7 +34,17 @@ onMounted(() => {
       },
     });
   }
-});
+};
+
+onMounted(createChart);
+
+// Watch for prop changes to update the chart dynamically
+watch(() => [props.labels, props.datasets], () => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    createChart();
+  }
+}, { deep: true });
 </script>
 
 <style scoped>

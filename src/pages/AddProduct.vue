@@ -120,7 +120,7 @@ export default {
 
     const submitProduct = async () => {
       errorMessage.value = "";
-      if (!product.value.name || !product.value.category || !product.value.price || !product.value.image) {
+      if (!product.value.name || !product.value.category || !product.value.price /* || !product.value.image */) {
         errorMessage.value = "All fields are required.";
         return;
       }
